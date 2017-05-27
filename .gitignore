@@ -3,4 +3,4 @@ checkpoint/
 sample/
 *.npy
 test/
-data/
+#data/
