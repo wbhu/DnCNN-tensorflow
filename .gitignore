@@ -1,0 +1,6 @@
+*.pyc
+checkpoint/
+sample/
+*.npy
+test/
+data/
