@@ -4,6 +4,8 @@ a tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residua
 ### Dependence
 ```
 tensorflow = 1.0.1
+cuda
+cudnn
 numpy
 PIL
 ```
@@ -11,9 +13,9 @@ PIL
 
 ### Use
 ```
-generate training patches
-train
-test
+$ python generate_patches.py
+$ python main.py
+(note: You can add command line arguments according to the source code.)
 ```
 
 ### Results
