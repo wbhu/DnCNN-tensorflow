@@ -114,7 +114,7 @@ class DnCNN(object):
 
 		# L2 loss
 		self.Y_ = self.X - self.X_ # noisy image - clean image
-		self.loss = (1.0 / self.batch_size) * tf.nn.l2_loss(self.Y_ - self.X_)
+		self.loss = (1.0 / self.batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
 
 		optimizer = tf.train.AdamOptimizer(self.lr, name='AdamOptimizer')
 		self.train_step = optimizer.minimize(self.loss)

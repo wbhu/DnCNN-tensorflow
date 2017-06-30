@@ -37,7 +37,7 @@ def generate_patches(isDebug = False):
 	size_dic = {}
 	# calculate the number of patches
 	for i in xrange(len(filepaths)):
-		img = Image.open(filepaths[i]).convert('L') # convert RGB to grey
+		img = Image.open(filepaths[i]).convert('L') # convert RGB to gray
 		for s in xrange(len(scales)):
 			newsize = (int(img.size[0] * scales[s]), int(img.size[1] * scales[s]))
 			img_s = img.resize(newsize, resample=PIL.Image.BICUBIC) # do not change the original img

@@ -33,7 +33,6 @@ def main(_):
         os.makedirs(args.test_dir)
 
     if args.use_gpu:
-
         # added to controll the gpu memory
         print("GPU\n")
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
