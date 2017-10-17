@@ -92,22 +92,22 @@ class DnCNN(object):
 			layer_9_output = self.layer(layer_8_output, [3, 3, 64, 64])
 		with tf.variable_scope('conv10'):
 			layer_10_output = self.layer(layer_9_output, [3, 3, 64, 64])
-		with tf.variable_scope('conv11'):
-			layer_11_output = self.layer(layer_10_output, [3, 3, 64, 64])
-		with tf.variable_scope('conv12'):
-			layer_12_output = self.layer(layer_11_output, [3, 3, 64, 64])
-		with tf.variable_scope('conv13'):
-			layer_13_output = self.layer(layer_12_output, [3, 3, 64, 64])
-		with tf.variable_scope('conv14'):
-			layer_14_output = self.layer(layer_13_output, [3, 3, 64, 64])
-		with tf.variable_scope('conv15'):
-			layer_15_output = self.layer(layer_14_output, [3, 3, 64, 64])
-		with tf.variable_scope('conv16'):
-			layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
+		# with tf.variable_scope('conv11'):
+		# 	layer_11_output = self.layer(layer_10_output, [3, 3, 64, 64])
+		# with tf.variable_scope('conv12'):
+		# 	layer_12_output = self.layer(layer_11_output, [3, 3, 64, 64])
+		# with tf.variable_scope('conv13'):
+		# 	layer_13_output = self.layer(layer_12_output, [3, 3, 64, 64])
+		# with tf.variable_scope('conv14'):
+		# 	layer_14_output = self.layer(layer_13_output, [3, 3, 64, 64])
+		# with tf.variable_scope('conv15'):
+		# 	layer_15_output = self.layer(layer_14_output, [3, 3, 64, 64])
+		# with tf.variable_scope('conv16'):
+		# 	layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
 
 		# layer 17
 		with tf.variable_scope('conv17'):
-			self.Y = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False)
+			self.Y = self.layer(layer_10_output, [3, 3, 64, self.output_c_dim], useBN=False)
 			# # self.Y_ = self.X - self.Y 
 			# for index in xrange(0,128):
 			# 	self.Y_[index,:,:,:] = guidedfilter(self.Y[index,:,:,:],self.X[index,:,:,:],5,0.0004)
@@ -118,6 +118,9 @@ class DnCNN(object):
 
 		optimizer = tf.train.AdamOptimizer(self.lr, name='AdamOptimizer')
 		self.train_step = optimizer.minimize(self.loss)
+		
+		tf.summary.scalar('loss',self.loss)
+		
 		# create this init op after all variables specified
 		self.init = tf.global_variables_initializer() 
 		self.saver = tf.train.Saver()
@@ -158,6 +161,9 @@ class DnCNN(object):
 		data = load_data(filepath='./data/img_clean_pats.npy')
 		numBatch = int(data.shape[0] / self.batch_size)
 		print("[*] Data shape = " + str(data.shape))
+		
+		writer = tf.summary.FileWriter('./logs',self.sess.graph)
+		merged = tf.summary.merge_all()
 
 		counter = 0
 		print("[*] Start training : ")
@@ -170,7 +176,7 @@ class DnCNN(object):
 				train_images = add_noise(batch_images, self.sigma, self.sess)
 
 				# print(str(train_images.shape))
-				_, loss = self.sess.run([self.train_step, self.loss], \
+				_, loss,summary = self.sess.run([self.train_step, self.loss,merged], \
 						feed_dict={self.X:train_images, self.X_:batch_images})
 				print("Epoch: [%2d] [%4d/%4d] time: %4.4f, loss: %.6f" \
 					% (epoch + 1, batch_id + 1, numBatch,
@@ -183,6 +189,8 @@ class DnCNN(object):
 				# save the model
 				if np.mod(counter, self.save_every_iter) == 0:
 					self.save(counter)
+
+			writer.add_summary(summary,epoch)
 		print("[*] Finish training.")
 
 	def save(self,counter):
