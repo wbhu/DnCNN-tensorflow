@@ -2,6 +2,5 @@
 checkpoint/
 sample/
 *.npy
-test/
 .idea/
-#data/
+! data/test
