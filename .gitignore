@@ -4,3 +4,5 @@ sample/
 *.npy
 .idea/
 ! data/test
+logs/
+test/
