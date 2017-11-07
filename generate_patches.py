@@ -51,7 +51,6 @@ def generate_patches(isDebug=False):
         numPatches = (origin_patch_num / args.bat_size + 1) * args.bat_size
     else:
         numPatches = origin_patch_num
-    # numPatches = math.ceil(count/args.bat_size) * args.bat_size * 8
     print "total patches = %d , batch size = %d, total batches = %d" % \
           (numPatches, args.bat_size, numPatches / args.bat_size)
     
@@ -71,13 +70,10 @@ def generate_patches(isDebug=False):
             
             for j in xrange(DATA_AUG_TIMES):
                 im_h, im_w, _ = img_s.shape
-                for x in range(0 + args.step, im_h - args.pat_size + 2, args.stride):
-                    for y in range(0 + args.step, im_w - args.pat_size + 2, args.stride):
+                for x in range(0 + args.step, im_h - args.pat_size + 1, args.stride):
+                    for y in range(0 + args.step, im_w - args.pat_size + 1, args.stride):
                         inputs[count, :, :, :] = data_augmentation(img_s[x:x + args.pat_size, y:y + args.pat_size, :], \
                                                                    random.randint(0, 7))
-                        # cv2.namedWindow('test')
-                        # cv2.imshow('test',inputs[count,...])
-                        # cv2.waitKey(0)
                         count += 1
     # pad the batch
     if count < numPatches:
