@@ -1,25 +1,46 @@
 # DnCNN-tensorflow   [![GPL Licence](https://badges.frapsoft.com/os/gpl/gpl.svg?v=103)](https://opensource.org/licenses/GPL-3.0/)  
 a tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
 
-### Dependence
+## Environment
+### With docker (recommended):
+0) Install docker, following the instructions on https://docs.docker.com/engine/installation/
+1) Install nvidia-docker, to make your GPU available to docker containers
+2) Create an image that can run the code from the provided Dockerfile. Call the image 'dncnn':
+```
+$ docker build --network host -t dncnn .
+$ ./rundocker.sh
+```
+Then you could train the model.
+
+### Without docker:
+You should make sure the following environment is contented
 ```
 tensorflow = 1.0.1
 numpy
 ```
 
-### Use
+
+## Train
 ```
 $ python generate_patches.py
 $ python main.py
-(note: You can add command line arguments according to the source code.)
+(note: You can add command line arguments according to the source code, for example
+    $ python main.py --batch_size 64 )
 ```
 
-### Model Architecture
+
+## Test
+```
+python main.py --phase test
+```
+
+
+## Model Architecture
 ![graph](./img/graph.png)
 
-### Results
+## Results
 
-#### Gaussian Denoising
+### Gaussian Denoising
 
 The average PSNR(dB) results of different methods on the BSD68 dataset.
 

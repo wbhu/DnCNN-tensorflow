@@ -10,4 +10,4 @@ RUN pip install \
     numpy
 
 VOLUME /workspace
-
+WORKDIR /workspace
