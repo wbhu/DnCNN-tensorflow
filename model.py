@@ -136,6 +136,7 @@ class DnCNN(object):
         for epoch in xrange(self.epoch):
             for batch_id in xrange(numBatch):
                 batch_images = data[batch_id * self.batch_size:(batch_id + 1) * self.batch_size, :, :, :]
+                batch_images = np.array(batch_images / 255.0, dtype=np.float32)
                 train_images = add_noise(batch_images, self.sigma, self.sess)
                 _, loss, summary = self.sess.run([self.train_step, self.loss, merged], \
                                                  feed_dict={self.X: train_images, self.X_: batch_images})
