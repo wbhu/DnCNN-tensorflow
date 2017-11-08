@@ -5,10 +5,10 @@ import PIL
 import random
 from utils import *
 
-# the pixel value range is '0-1' of training data
+# the pixel value range is '0-255'(uint8 ) of training data
 
 # macro
-DATA_AUG_TIMES = 4  # transform a sample to a different sample for DATA_AUG_TIMES times
+DATA_AUG_TIMES = 1  # transform a sample to a different sample for DATA_AUG_TIMES times
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--src_dir', dest='src_dir', default='./data/Train400', help='dir of data')
@@ -46,8 +46,6 @@ def generate_patches(isDebug=False):
     origin_patch_num = count * DATA_AUG_TIMES
     
     if origin_patch_num % args.bat_size != 0:
-        # if the final batch is not complete, make it complete
-        # totaly (origin_patch_num/args.bat_size + 1) patches
         numPatches = (origin_patch_num / args.bat_size + 1) * args.bat_size
     else:
         numPatches = origin_patch_num
@@ -79,9 +77,6 @@ def generate_patches(isDebug=False):
     if count < numPatches:
         to_pad = numPatches - count
         inputs[-to_pad:, :, :, :] = inputs[:to_pad, :, :, :]
-    
-    assert np.max(inputs) > 1
-    # inputs = inputs / 255.0  # normalize to [0, 1]
     
     if not os.path.exists(args.save_dir):
         os.mkdir(args.save_dir)
