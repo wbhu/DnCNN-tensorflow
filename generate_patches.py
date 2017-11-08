@@ -81,7 +81,7 @@ def generate_patches(isDebug=False):
         inputs[-to_pad:, :, :, :] = inputs[:to_pad, :, :, :]
     
     assert np.max(inputs) > 1
-    inputs = inputs / 255.0  # normalize to [0, 1]
+    #inputs = inputs / 255.0  # normalize to [0, 1]
     
     if not os.path.exists(args.save_dir):
         os.mkdir(args.save_dir)
