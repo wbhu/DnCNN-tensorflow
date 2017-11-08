@@ -10,6 +10,9 @@ numpy
 PIL
 ```
 
+### Model Architecture
+![graph](./img/graph.png)
+
 
 ### Use
 ```
