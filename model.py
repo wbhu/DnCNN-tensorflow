@@ -209,7 +209,7 @@ class DnCNN(object):
             layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
         # layer 17
         with tf.variable_scope('conv17', reuse=True):
-            self.Y_test = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False)
+            self.Y_test = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False,useReLU=False)
     
     def load(self, checkpoint_dir):
         '''Load checkpoint file'''
