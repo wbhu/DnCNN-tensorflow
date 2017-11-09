@@ -82,7 +82,7 @@ class DnCNN(object):
             layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
         # layer 17
         with tf.variable_scope('conv17'):
-            self.Y = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False)
+            self.Y = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False, useReLU=False)
         # L2 loss
         self.Y_ = self.X - self.X_  # noisy image - clean image
         self.loss = (1.0 / self.batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
@@ -111,12 +111,15 @@ class DnCNN(object):
         tf.constant_initializer(b_init))
         return batch_normalization(logits, alpha, beta, isCovNet=True)
     
-    def layer(self, inputdata, filter_shape, b_init=0.0, stridemode=[1, 1, 1, 1], useBN=True):
+    def layer(self, inputdata, filter_shape, b_init=0.0, stridemode=[1, 1, 1, 1], useBN=True, useReLU=True):
         logits = self.conv_layer(inputdata, filter_shape, b_init, stridemode)
-        if useBN:
-            output = tf.nn.relu(self.bn_layer(logits, filter_shape[-1]))
+        if useReLU == False:
+            output = logits
         else:
-            output = tf.nn.relu(logits)
+            if useBN:
+                output = tf.nn.relu(self.bn_layer(logits, filter_shape[-1]))
+            else:
+                output = tf.nn.relu(logits)
         return output
     
     def train(self):
