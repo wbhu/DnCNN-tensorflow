@@ -5,8 +5,6 @@ from ops import *
 from utils import *
 from six.moves import xrange
 import time
-import cv2
-
 
 class DnCNN(object):
     def __init__(self, sess, patch_size=40, batch_size=128,
@@ -271,7 +269,6 @@ class DnCNN(object):
             noisy_image = add_noise(test_data[idx] / 255.0, self.sigma, self.sess)  # ndarray
             predicted_noise = self.forward(noisy_image)
             output_clean_image = noisy_image - predicted_noise
-            
             groundtruth = np.clip(test_data[idx], 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
