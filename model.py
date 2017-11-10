@@ -5,6 +5,7 @@ from ops import *
 from utils import *
 from six.moves import xrange
 import time
+import cv2
 
 
 class DnCNN(object):
@@ -13,7 +14,7 @@ class DnCNN(object):
                  sigma=25, clip_b=0.025, lr=0.001, epoch=50,
                  ckpt_dir='./checkpoint', sample_dir='./sample',
                  test_save_dir='./test',
-                 dataset='BSD400', testset='Set12'):
+                 dataset='BSD400', testset='BSD68'):
         self.sess = sess
         self.is_gray = (input_c_dim == 1)
         self.batch_size = batch_size
@@ -235,27 +236,28 @@ class DnCNN(object):
         tf.initialize_all_variables().run()
         print (self.test_save_dir)
         test_files = glob('./data/test/{}/*.png'.format(self.testset))
-        # load testing input
-        print("[*] Loading test images ...")
-        test_data = load_images(test_files)  # list of array of different size, range 0-255
         if self.load(self.ckpt_dir):
             print(" [*] Load SUCCESS")
         else:
             print(" [!] Load failed...")
         psnr_sum = 0
+        print("[*] " + 'noise level: ' + str(self.sigma) +  " start testing...")
         for idx in xrange(len(test_files)):
-            noisy_image = add_noise(test_data[idx] / 255.0, self.sigma, self.sess)  # ndarray
+            test_data = load_image(test_files[idx])
+            noisy_image = add_noise(test_data/ 255.0, self.sigma, self.sess)  # ndarray
             predicted_noise = self.forward(noisy_image)
-            output_clean_image = noisy_image - predicted_noise
-            
-            groundtruth = np.clip(test_data[idx], 0, 255).astype('uint8')
+            output_clean_image = noisy_image - predicted_noise          
+            groundtruth = np.clip(test_data, 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
             # calculate PSNR
             psnr = cal_psnr(groundtruth, outputimage)
+            print(psnr)
             psnr_sum += psnr
-            save_images(groundtruth, noisyimage, outputimage,
-                        os.path.join(self.test_save_dir, 'test%d.png' % idx))
+            save_image(noisyimage,
+                        os.path.join(self.test_save_dir, 'noisy%d.png' % idx))
+            save_image(outputimage,
+                        os.path.join(self.test_save_dir, 'denoised%d.png' % idx))
         avg_psnr = psnr_sum / len(test_files)
         print("--- Average PSNR %.2f ---" % avg_psnr)
     

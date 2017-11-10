@@ -58,7 +58,13 @@ def load_images(filelist):
     data = []
     for file in filelist:
         im = Image.open(file).convert('L')
-        data.append(np.array(im).reshape(1, im.size[0], im.size[1], 1))
+        data.append(np.array(im).reshape(1, im.size[1], im.size[0], 1))
+    return data
+
+
+def load_image(filename):
+    im = Image.open(filename).convert('L')
+    data =np.array(im).reshape(1, im.size[1], im.size[0], 1)
     return data
 
 
@@ -74,8 +80,15 @@ def save_images(ground_truth, noisy_image, clean_image, filepath):
     im.save(filepath, 'png')
 
 
+def save_image(im,filepath):
+    _, im_h, im_w, _ = im.shape
+    im = im.reshape(im_h,im_w)
+    img = Image.fromarray(im.astype('uint8')).convert('L')
+    img.save(filepath, 'png')
+
+
 def cal_psnr(im1, im2):
-    # assert pixel value range is 0-255
-    mse = (np.abs(im1 - im2) ** 2).mean()
-    psnr = 10 * np.log10(255 * 255 / mse)
+    # assert pixel value range is 0-255 and type is uint8
+    mse = ( (im1.astype(np.float) - im2.astype(np.float)) ** 2 ).mean()
+    psnr = 10 * np.log10(255 ** 2 / mse)
     return psnr
