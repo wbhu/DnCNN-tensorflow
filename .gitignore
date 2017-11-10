@@ -5,3 +5,4 @@ sample/
 .idea/
 logs/
 test/
+*.tar.gz
