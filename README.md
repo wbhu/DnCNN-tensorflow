@@ -2,7 +2,7 @@
 a tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
 
 ## Model Architecture
-![graph](./img/graph.png)
+![graph](./img/model.png)
 
 
 ## Results
