@@ -1,9 +1,11 @@
 # DnCNN-tensorflow   [![GPL Licence](https://badges.frapsoft.com/os/gpl/gpl.svg?v=103)](https://opensource.org/licenses/GPL-3.0/)  
 a tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
 
+## Model Architecture
+![graph](./img/graph.png)
+
 
 ## Results
-
 ### Gaussian Denoising
 #### GT
 ![gt](./img/gt.png) 
@@ -53,12 +55,18 @@ Here is my training loss:
 
 ## Test
 ```
-python main.py --phase test
+$ python main.py --phase test
 ```
 
+## TODO
+* Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py)
+* Replace PIL with OpenCV.
+* Fix bugs, such as #13.
+* Support the newest tensorflow(1.4)
 
-## Model Architecture
-![graph](./img/graph.png)
+## Thanks for their contributions
+* @lizhiyuanUSTC
+* @husqin
 
 
 
