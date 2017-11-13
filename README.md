@@ -24,11 +24,22 @@ The average PSNR(dB) results of different methods on the BSD68 dataset.
 
 ## Environment
 ### With docker (recommended):
-0) Install docker, following the instructions on https://docs.docker.com/engine/installation/
-1) Install nvidia-docker, to make your GPU available to docker containers
-2) Create an image that can run the code from the provided Dockerfile. Call the image 'dncnn':
+#### Install docker support
+You may do it like this(ubuntu):
+``` shell
+$ sudo apt-get install -y curl
+$ curl -sSL https://get.docker.com/ | sh
+$ sudo usermod -G docker ${USER}
 ```
-$ docker build --network host -t dncnn .
+#### Install nvidia-docker (to make your GPU available to docker containers)
+```shell
+$ wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
+$ sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
+```
+
+#### Pull dncnn image and start a container
+```shell
+$ docker pull wenbodut/dncnn
 $ ./rundocker.sh
 ```
 Then you could train the model.
