@@ -6,3 +6,4 @@ sample/
 logs/
 test/
 *.tar.gz
+*.pptx

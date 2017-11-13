@@ -6,15 +6,10 @@ A tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residua
 
 
 ## Results
-### Gaussian Denoising
-#### GT
-![gt](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/gt.png) 
-#### Noisy
-![noisy](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/noisy.png)
-#### Denoised
-![denoised](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/denoised.png)
+![compare]((https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/compare.png))
 
-#### BSD68 Average Result 
+- BSD68 Average Result
+ 
 The average PSNR(dB) results of different methods on the BSD68 dataset.
 
 |  Noise Level | BM3D | WNNM  | EPLL | MLP |  CSF |TNRD  | DnCNN-S | DnCNN-B | DnCNN-tensorflow |
