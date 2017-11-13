@@ -1,6 +1,5 @@
 import argparse
 import os
-import numpy as np
 from model import DnCNN
 import tensorflow as tf
 
@@ -32,7 +31,8 @@ def main(_):
         gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
         with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
             model = DnCNN(sess, sigma=args.sigma, lr=args.lr, epoch=args.epoch,
-                          batch_size=args.batch_size)
+                          ckpt_dir=args.ckpt_dir, sample_dir=args.sample_dir,
+                          test_save_dir=args.test_dir, batch_size=args.batch_size)
             if args.phase == 'train':
                 model.train()
             else:
@@ -41,8 +41,9 @@ def main(_):
     else:
         print("CPU\n")
         with tf.Session() as sess:
-            model = DnCNN(sess, sigma=args.sigma, lr=args.lr,
-                          epoch=args.epoch, batch_size=args.batch_size)
+            model = DnCNN(sess, sigma=args.sigma, lr=args.lr, epoch=args.epoch,
+                          ckpt_dir=args.ckpt_dir, sample_dir=args.sample_dir,
+                          test_save_dir=args.test_dir, batch_size=args.batch_size)
             if args.phase == 'train':
                 model.train()
             else:
