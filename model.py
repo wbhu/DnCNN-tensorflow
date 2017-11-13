@@ -6,13 +6,13 @@ from utils import *
 from six.moves import xrange
 import time
 
+
 class DnCNN(object):
     def __init__(self, sess, patch_size=40, batch_size=128,
                  output_size=40, input_c_dim=1, output_c_dim=1,
                  sigma=25, clip_b=0.025, lr=0.001, epoch=50,
-                 ckpt_dir='./checkpoint', sample_dir='./sample',
-                 test_save_dir='./test',
-                 dataset='BSD400', testset='BSD68'):
+                 ckpt_dir='./checkpoint', sample_dir='./sample', test_save_dir='./test',
+                 dataset='BSD400', testset='BSD68', evalset='Set12'):
         self.sess = sess
         self.is_gray = (input_c_dim == 1)
         self.batch_size = batch_size
@@ -27,9 +27,11 @@ class DnCNN(object):
         self.ckpt_dir = ckpt_dir
         self.trainset = dataset
         self.testset = testset
+        self.evalset = evalset
         self.sample_dir = sample_dir
         self.test_save_dir = test_save_dir
         self.epoch = epoch
+        # Fixed params
         self.save_every_epoch = 10
         self.eval_every_epoch = 10
         # Adam setting (default setting)
@@ -37,10 +39,10 @@ class DnCNN(object):
         self.beta2 = 0.999
         self.alpha = 0.01
         self.epsilon = 1e-8
+        
         self.build_model()
     
     def build_model(self):
-        # input : [batchsize, patch_sioze, patch_sioze, channel]
         self.X = tf.placeholder(tf.float32, [None, self.patch_sioze, self.patch_sioze, self.input_c_dim],
                                 name='noisy_image')
         self.X_ = tf.placeholder(tf.float32, [None, self.patch_sioze, self.patch_sioze, self.input_c_dim],
@@ -85,11 +87,9 @@ class DnCNN(object):
         # L2 loss
         self.Y_ = self.X - self.X_  # noisy image - clean image
         self.loss = (1.0 / self.batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
-        
         optimizer = tf.train.AdamOptimizer(self.lr, name='AdamOptimizer')
         self.train_step = optimizer.minimize(self.loss)
         tf.summary.scalar('loss', self.loss)
-        
         # create this init op after all variables specified
         self.init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
@@ -125,32 +125,32 @@ class DnCNN(object):
         # init the variables
         self.sess.run(self.init)
         # get data
-        test_files = glob('./data/test/{}/*.png'.format(self.testset))
-        test_data = load_images(test_files)  # list of array of different size, 4-D, pixel value range is 0-255
+        eval_files = glob('./data/test/{}/*.png'.format(self.evalset))
+        eval_data = load_images(eval_files)  # list of array of different size, 4-D, pixel value range is 0-255
         data = load_data(filepath='./data/img_clean_pats.npy')
         numBatch = int(data.shape[0] / self.batch_size)
-        # print("[*] Data shape = " + str(data.shape))
         writer = tf.summary.FileWriter('./logs', self.sess.graph)
         merged = tf.summary.merge_all()
         iter_num = 0
         print("[*] Start training : ")
         start_time = time.time()
+        self.evaluate(iter_num, eval_data)  # eval_data value range is 0-255
         for epoch in xrange(self.epoch):
+            np.random.shuffle(data)
             for batch_id in xrange(numBatch):
                 batch_images = data[batch_id * self.batch_size:(batch_id + 1) * self.batch_size, :, :, :]
-                batch_images = np.array(batch_images / 255.0, dtype=np.float32)     #normalize the data to 0-1
+                batch_images = np.array(batch_images / 255.0, dtype=np.float32)  # normalize the data to 0-1
                 train_images = add_noise(batch_images, self.sigma, self.sess)
-                _, loss, summary = self.sess.run([self.train_step, self.loss, merged], \
+                _, loss, summary = self.sess.run([self.train_step, self.loss, merged],
                                                  feed_dict={self.X: train_images, self.X_: batch_images})
-                print("Epoch: [%2d] [%4d/%4d] time: %4.4f, loss: %.6f" \
-                      % (epoch + 1, batch_id + 1, numBatch,
-                         time.time() - start_time, loss))
+                print("Epoch: [%2d] [%4d/%4d] time: %4.4f, loss: %.6f"
+                      % (epoch + 1, batch_id + 1, numBatch, time.time() - start_time, loss))
                 iter_num += 1
                 writer.add_summary(summary, iter_num)
-            if np.mod(epoch, self.eval_every_epoch) == 0:
-                self.evaluate(epoch, iter_num, test_data)  # test_data value range is 0-255
+            if np.mod(epoch + 1, self.eval_every_epoch) == 0:
+                self.evaluate(epoch, eval_data)  # eval_data value range is 0-255
             # save the model
-            if np.mod(iter_num, self.save_every_epoch) == 0:
+            if np.mod(epoch + 1, self.save_every_epoch) == 0:
                 self.save(iter_num)
         print("[*] Finish training.")
     
@@ -208,10 +208,9 @@ class DnCNN(object):
             layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
         # layer 17
         with tf.variable_scope('conv17', reuse=True):
-            self.Y_test = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False,useReLU=False)
+            self.Y_test = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False, useReLU=False)
     
     def load(self, checkpoint_dir):
-        '''Load checkpoint file'''
         print("[*] Reading checkpoint...")
         model_dir = "%s_%s_%s" % (self.trainset, self.batch_size, self.patch_sioze)
         checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
@@ -232,51 +231,48 @@ class DnCNN(object):
         """Test DnCNN"""
         # init variables
         tf.initialize_all_variables().run()
-        print (self.test_save_dir)
         test_files = glob('./data/test/{}/*.png'.format(self.testset))
         if self.load(self.ckpt_dir):
-            print(" [*] Load SUCCESS")
+            print(" [*] Load weights SUCCESS...")
         else:
-            print(" [!] Load failed...")
+            print(" [!] Load weights FAILED...")
         psnr_sum = 0
-        print("[*] " + 'noise level: ' + str(self.sigma) +  " start testing...")
+        print("[*] " + 'noise level: ' + str(self.sigma) + " start testing...")
         for idx in xrange(len(test_files)):
             test_data = load_image(test_files[idx])
-            noisy_image = add_noise(test_data/ 255.0, self.sigma, self.sess)  # ndarray
+            noisy_image = add_noise(test_data / 255.0, self.sigma, self.sess)  # ndarray
             predicted_noise = self.forward(noisy_image)
-            output_clean_image = noisy_image - predicted_noise          
+            output_clean_image = noisy_image - predicted_noise
             groundtruth = np.clip(test_data, 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
             # calculate PSNR
             psnr = cal_psnr(groundtruth, outputimage)
-            print(psnr)
+            print("img%d PSNR: %.2f" % (idx, psnr))
             psnr_sum += psnr
             save_image(noisyimage,
-                        os.path.join(self.test_save_dir, 'noisy%d.png' % idx))
+                       os.path.join(self.test_save_dir, 'noisy%d.png' % idx))
             save_image(outputimage,
-                        os.path.join(self.test_save_dir, 'denoised%d.png' % idx))
+                       os.path.join(self.test_save_dir, 'denoised%d.png' % idx))
         avg_psnr = psnr_sum / len(test_files)
         print("--- Average PSNR %.2f ---" % avg_psnr)
     
-    def evaluate(self, epoch, iter_num, test_data):
+    def evaluate(self, iter_num, test_data):
         # assert test_data value range is 0-255
         print("[*] Evaluating...")
         psnr_sum = 0
         for idx in xrange(len(test_data)):
-            print (np.max(test_data[idx]))
-            assert np.max(test_data[idx]) > 1
             noisy_image = add_noise(test_data[idx] / 255.0, self.sigma, self.sess)  # ndarray
             predicted_noise = self.forward(noisy_image)
             output_clean_image = noisy_image - predicted_noise
             groundtruth = np.clip(test_data[idx], 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
-            
             # calculate PSNR
             psnr = cal_psnr(groundtruth, outputimage)
+            print("img%d PSNR: %.2f" % (idx, psnr))
             psnr_sum += psnr
             save_images(groundtruth, noisyimage, outputimage,
-                        os.path.join(self.sample_dir, 'test%d_%d_%d.png' % (idx, epoch, iter_num)))
+                        os.path.join(self.sample_dir, 'test%d_%d.png' % (idx, iter_num)))
         avg_psnr = psnr_sum / len(test_data)
         print("--- Test ---- Average PSNR %.2f ---" % avg_psnr)
