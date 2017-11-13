@@ -24,20 +24,23 @@ The average PSNR(dB) results of different methods on the BSD68 dataset.
 
 ## Environment
 ### With docker (recommended):
-#### Install docker support
+- Install docker support
+
 You may do it like this(ubuntu):
 ``` shell
 $ sudo apt-get install -y curl
 $ curl -sSL https://get.docker.com/ | sh
 $ sudo usermod -G docker ${USER}
 ```
-#### Install nvidia-docker (to make your GPU available to docker containers)
+- Install nvidia-docker support(to make your GPU available to docker containers)
+
+You may do it like this(ubuntu):
 ```shell
 $ wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
 $ sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb
 ```
 
-#### Pull dncnn image and start a container
+- Pull dncnn image and start a container
 ```shell
 $ docker pull wenbodut/dncnn
 $ ./rundocker.sh
