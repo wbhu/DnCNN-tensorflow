@@ -1,5 +1,5 @@
 # DnCNN-tensorflow   
-[![GPL Licence](https://badges.frapsoft.com/os/gpl/gpl.svg?v=103)](LICENSE)
+[![AUR](https://img.shields.io/aur/license/yaourt.svg?style=plastic)](LICENSE)
 [![Docker Automated build](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg?style=plastic)](https://hub.docker.com/r/wenbodut/dncnn/)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=plastic)](CONTRIBUTING.md)
   
