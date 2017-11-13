@@ -1,18 +1,18 @@
 # DnCNN-tensorflow   [![GPL Licence](https://badges.frapsoft.com/os/gpl/gpl.svg?v=103)](https://opensource.org/licenses/GPL-3.0/)  
-a tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
+A tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
 
 ## Model Architecture
-![graph](./img/model.png)
+![graph](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/model.png)
 
 
 ## Results
 ### Gaussian Denoising
 #### GT
-![gt](./img/gt.png) 
+![gt](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/gt.png) 
 #### Noisy
-![noisy](./img/noisy.png)
+![noisy](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/noisy.png)
 #### Denoised
-![denoised](./img/denoised.png)
+![denoised](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/denoised.png)
 
 #### BSD68 Average Result 
 The average PSNR(dB) results of different methods on the BSD68 dataset.
@@ -36,7 +36,7 @@ Then you could train the model.
 ### Without docker:
 You should make sure the following environment is contented
 ```
-tensorflow = 1.0.1
+tensorflow == 1.0.1
 numpy
 ```
 
@@ -51,7 +51,7 @@ $ python main.py
 Here is my training loss:
 
 
-![loss](./img/loss.png) 
+![loss](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/loss.png) 
 
 ## Test
 ```
@@ -59,16 +59,18 @@ $ python main.py --phase test
 ```
 
 ## TODO
-* Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py)
-* Replace PIL with OpenCV.
-* Fix bugs, such as #13. (bug #13 fixed, thanks to @sdlpkxd)
-* Support the newest tensorflow(1.4)
+- [x] Fix bug #13. (bug #13 fixed, thanks to @sdlpkxd)
+- [ ] Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py).
+- [ ] Add one-key denoising, with the help of docker.
+- [ ] Replace tf.nn with tf.layer.
+- [ ] Replace PIL with OpenCV.
+
 
 ## Thanks for their contributions
-* @lizhiyuanUSTC
-* @husqin
-* @sdlpkxd
-* and so on ...
+- @lizhiyuanUSTC
+- @husqin
+- @sdlpkxd
+- and so on ...
 
 
 
