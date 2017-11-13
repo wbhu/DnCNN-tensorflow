@@ -6,7 +6,7 @@ A tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residua
 
 
 ## Results
-![compare]((https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/compare.png))
+![compare](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/compare.png)
 
 - BSD68 Average Result
  
