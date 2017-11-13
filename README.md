@@ -61,12 +61,14 @@ $ python main.py --phase test
 ## TODO
 * Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py)
 * Replace PIL with OpenCV.
-* Fix bugs, such as #13.
+* Fix bugs, such as #13. (bug #13 fixed, thanks to @sdlpkxd)
 * Support the newest tensorflow(1.4)
 
 ## Thanks for their contributions
 * @lizhiyuanUSTC
 * @husqin
+* @sdlpkxd
+* and so on ...
 
 
 
