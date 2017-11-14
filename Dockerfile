@@ -11,3 +11,4 @@ RUN pip install \
 
 VOLUME /workspace
 WORKDIR /workspace
+CMD    ["/usr/sbin/sshd", "-D"]
