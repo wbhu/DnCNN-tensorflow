@@ -29,7 +29,7 @@ You may do it like this(ubuntu):
 ``` shell
 $ sudo apt-get install -y curl
 $ curl -sSL https://get.docker.com/ | sh
-$ sudo usermod -G docker ${USER}
+$ sudo usermod -aG docker ${USER}
 ```
 - Install nvidia-docker support(to make your GPU available to docker containers)
 
