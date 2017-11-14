@@ -3,3 +3,4 @@ RUN pip install \
     numpy
 VOLUME /workspace
 WORKDIR /workspace
+CMD    ["/usr/sbin/sshd", "-D"]
