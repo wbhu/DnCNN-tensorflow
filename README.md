@@ -73,8 +73,8 @@ $ python main.py --phase test
 
 ## TODO
 - [x] Fix bug #13. (bug #13 fixed, thanks to @sdlpkxd)
-- [ ] Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py).
-- [ ] Add one-key denoising, with the help of docker.
+- [x] Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py).
+- [x] Add one-key denoising, with the help of docker.
 - [ ] Replace tf.nn with tf.layer.
 - [ ] Replace PIL with OpenCV.
 

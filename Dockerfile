@@ -3,4 +3,4 @@ RUN pip install \
     numpy
 VOLUME /workspace
 WORKDIR /workspace
-CMD    ["/usr/sbin/sshd", "-D"]
+CMD python main.py --phase test --checkpoint_dir ./checkpoint_demo --test_set Set12
