@@ -64,23 +64,17 @@ def load_images(filelist):
     return data
 
 
-def save_images(ground_truth, noisy_image, clean_image, filepath):
+def save_images(filepath, ground_truth, noisy_image=None, clean_image=None):
     # assert the pixel value range is 0-255
-    _, im_h, im_w, _ = noisy_image.shape
-    ground_truth = ground_truth.reshape((im_h, im_w))
-    noisy_image = noisy_image.reshape((im_h, im_w))
-    clean_image = clean_image.reshape((im_h, im_w))
-    cat_image = np.column_stack((noisy_image, clean_image))
-    cat_image = np.column_stack((ground_truth, cat_image))
+    ground_truth = np.squeeze(ground_truth)
+    noisy_image = np.squeeze(noisy_image)
+    clean_image = np.squeeze(clean_image)
+    if not clean_image.any():
+        cat_image = ground_truth
+    else:
+        cat_image = np.concatenate([ground_truth, noisy_image, clean_image], axis=1)
     im = Image.fromarray(cat_image.astype('uint8')).convert('L')
     im.save(filepath, 'png')
-
-
-def save_image(im, filepath):
-    _, im_h, im_w, _ = im.shape
-    im = im.reshape(im_h, im_w)
-    img = Image.fromarray(im.astype('uint8')).convert('L')
-    img.save(filepath, 'png')
 
 
 def cal_psnr(im1, im2):

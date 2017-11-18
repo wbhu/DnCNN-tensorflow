@@ -250,10 +250,8 @@ class DnCNN(object):
             psnr = cal_psnr(groundtruth, outputimage)
             print("img%d PSNR: %.2f" % (idx, psnr))
             psnr_sum += psnr
-            save_image(noisyimage,
-                       os.path.join(self.test_save_dir, 'noisy%d.png' % idx))
-            save_image(outputimage,
-                       os.path.join(self.test_save_dir, 'denoised%d.png' % idx))
+            save_images(os.path.join(self.test_save_dir, 'noisy%d.png' % idx), noisyimage)
+            save_images(os.path.join(self.test_save_dir, 'denoised%d.png' % idx), outputimage)
         avg_psnr = psnr_sum / len(test_files)
         print("--- Average PSNR %.2f ---" % avg_psnr)
 
@@ -272,7 +270,7 @@ class DnCNN(object):
             psnr = cal_psnr(groundtruth, outputimage)
             print("img%d PSNR: %.2f" % (idx, psnr))
             psnr_sum += psnr
-            save_images(groundtruth, noisyimage, outputimage,
-                        os.path.join(self.sample_dir, 'test%d_%d.png' % (idx, iter_num)))
+            save_images(os.path.join(self.sample_dir, 'test%d_%d.png' % (idx, iter_num)),
+                        groundtruth, noisyimage, outputimage)
         avg_psnr = psnr_sum / len(test_data)
         print("--- Test ---- Average PSNR %.2f ---" % avg_psnr)
