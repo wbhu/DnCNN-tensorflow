@@ -25,7 +25,7 @@ def main(_):
         os.makedirs(args.sample_dir)
     if not os.path.exists(args.test_dir):
         os.makedirs(args.test_dir)
-    
+
     if args.use_gpu:
         # added to control the gpu memory
         print("GPU\n")
@@ -38,7 +38,7 @@ def main(_):
                 model.train()
             else:
                 model.test()
-    
+
     else:
         print("CPU\n")
         with tf.Session() as sess:
