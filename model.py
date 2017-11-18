@@ -39,9 +39,9 @@ class DnCNN(object):
         self.beta2 = 0.999
         self.alpha = 0.01
         self.epsilon = 1e-8
-        
+
         self.build_model()
-    
+
     def build_model(self):
         self.X = tf.placeholder(tf.float32, [None, self.patch_sioze, self.patch_sioze, self.input_c_dim],
                                 name='noisy_image')
@@ -94,7 +94,7 @@ class DnCNN(object):
         self.init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         print("[*] Initialize model successfully...")
-    
+
     def conv_layer(self, inputdata, weightshape, b_init, stridemode):
         # weights
         W = tf.get_variable('weights', weightshape,
@@ -102,14 +102,14 @@ class DnCNN(object):
         b = tf.get_variable('biases', [1, weightshape[-1]], initializer=tf.constant_initializer(b_init))
         # convolutional layer
         return tf.add(tf.nn.conv2d(inputdata, W, strides=stridemode, padding="SAME"), b)  # SAME with zero padding
-    
+
     def bn_layer(self, logits, output_dim, b_init=0.0):
         alpha = tf.get_variable('bn_alpha', [1, output_dim], initializer=
         tf.constant_initializer(get_bn_weights([1, output_dim], self.clip_b, self.sess)))
         beta = tf.get_variable('bn_beta', [1, output_dim], initializer=
         tf.constant_initializer(b_init))
         return batch_normalization(logits, alpha, beta, isCovNet=True)
-    
+
     def layer(self, inputdata, filter_shape, b_init=0.0, stridemode=[1, 1, 1, 1], useBN=True, useReLU=True):
         logits = self.conv_layer(inputdata, filter_shape, b_init, stridemode)
         if useReLU == False:
@@ -120,7 +120,7 @@ class DnCNN(object):
             else:
                 output = tf.nn.relu(logits)
         return output
-    
+
     def train(self):
         # init the variables
         self.sess.run(self.init)
@@ -153,21 +153,21 @@ class DnCNN(object):
             if np.mod(epoch + 1, self.save_every_epoch) == 0:
                 self.save(iter_num)
         print("[*] Finish training.")
-    
+
     def save(self, iter_num):
         model_name = "DnCNN.model"
         model_dir = "%s_%s_%s" % (self.trainset,
                                   self.batch_size, self.patch_sioze)
         checkpoint_dir = os.path.join(self.ckpt_dir, model_dir)
-        
+
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
-        
+
         print("[*] Saving model...")
         self.saver.save(self.sess,
                         os.path.join(checkpoint_dir, model_name),
                         global_step=iter_num)
-    
+
     def sampler(self, image):
         # set reuse flag to True
         # tf.get_variable_scope().reuse_variables()
@@ -209,7 +209,7 @@ class DnCNN(object):
         # layer 17
         with tf.variable_scope('conv17', reuse=True):
             self.Y_test = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False, useReLU=False)
-    
+
     def load(self, checkpoint_dir):
         print("[*] Reading checkpoint...")
         model_dir = "%s_%s_%s" % (self.trainset, self.batch_size, self.patch_sioze)
@@ -221,12 +221,12 @@ class DnCNN(object):
             return True
         else:
             return False
-    
+
     def forward(self, noisy_image):
         # assert noisy_image is range 0-1
         self.sampler(noisy_image)
         return self.sess.run(self.Y_test, feed_dict={self.X_test: noisy_image})
-    
+
     def test(self):
         """Test DnCNN"""
         # init variables
@@ -239,7 +239,7 @@ class DnCNN(object):
         psnr_sum = 0
         print("[*] " + 'noise level: ' + str(self.sigma) + " start testing...")
         for idx in xrange(len(test_files)):
-            test_data = load_image(test_files[idx])
+            test_data = load_images(test_files[idx])
             noisy_image = add_noise(test_data / 255.0, self.sigma, self.sess)  # ndarray
             predicted_noise = self.forward(noisy_image)
             output_clean_image = noisy_image - predicted_noise
@@ -256,7 +256,7 @@ class DnCNN(object):
                        os.path.join(self.test_save_dir, 'denoised%d.png' % idx))
         avg_psnr = psnr_sum / len(test_files)
         print("--- Average PSNR %.2f ---" % avg_psnr)
-    
+
     def evaluate(self, iter_num, test_data):
         # assert test_data value range is 0-255
         print("[*] Evaluating...")
