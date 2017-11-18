@@ -54,6 +54,13 @@ numpy
 ```
 
 
+## One-Key-To-Denoise
+```
+$ ./oneKeyToDenoise.sh
+(need docker support)
+```
+Then you could find the noisy Set12 images and denoised images in test folder. Have fun!
+
 ## Train
 ```
 $ python generate_patches.py
