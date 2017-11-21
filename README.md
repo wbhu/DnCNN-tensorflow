@@ -22,7 +22,7 @@ The average PSNR(dB) results of different methods on the BSD68 dataset.
 
 
 ## Environment
-### With docker (recommended):
+### :whale: With docker (recommended):
 - Install docker support
 
 You may do it like this(ubuntu):
