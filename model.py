@@ -191,7 +191,7 @@ class DnCNN(object):
         psnr_sum = 0
         print("[*] " + 'noise level: ' + str(self.sigma) + " start testing...")
         for idx in xrange(len(test_files)):
-            clean_image = load_images(test_files[idx])
+            clean_image = load_images(test_files[idx]).astype(np.float32) / 255.0
             predicted_noise, noisy_image = self.sess.run([self.Y, self.X],
                                                          feed_dict={self.X_: clean_image})
             output_clean_image = noisy_image - predicted_noise
@@ -212,8 +212,9 @@ class DnCNN(object):
         print("[*] Evaluating...")
         psnr_sum = 0
         for idx in xrange(len(test_data)):
+            clean_image = test_data[idx].astype(np.float32) / 255.0
             predicted_noise, noisy_image = self.sess.run([self.Y, self.X],
-                                                         feed_dict={self.X_: test_data[idx]})
+                                                         feed_dict={self.X_: clean_image})
             output_clean_image = noisy_image - predicted_noise
             groundtruth = np.clip(test_data[idx], 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
