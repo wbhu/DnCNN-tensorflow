@@ -3,25 +3,16 @@ import math
 from six.moves import xrange
 
 
-def lrelu(x, leak=0.2, name="lrelu"):
-    return tf.maximum(x, leak * x)
-
-
 def batch_normalization(logits, scale, offset, isCovNet=False, name="bn"):
-    # exp_moving_avg = tf.train.ExponentialMovingAverage(0.9999, iteration)
     if isCovNet:
         mean, var = tf.nn.moments(logits, [0, 1, 2])
     else:
         mean, var = tf.nn.moments(logits, [0])
-    # update_moving_avg = exp_moving_avg.apply([mean, var])
-    # m = tf.cond(self.istest, lambda: exp_moving_avg.average(mean), lambda:mean)
-    # v = tf.cond(self.istest, lambda: exp_moving_avg.average(var), lambda:var)
     output = tf.nn.batch_normalization(logits, mean, var, offset, scale, variance_epsilon=1e-5)
     return output
 
 
 def get_conv_weights(weight_shape, sess, name="get_conv_weights"):
-    # TODO:truncated_normal is not the same as randn
     return math.sqrt(2 / (9.0 * 64)) * sess.run(tf.truncated_normal(weight_shape))
 
 

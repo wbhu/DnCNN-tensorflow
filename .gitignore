@@ -3,6 +3,7 @@ checkpoint/
 sample/
 *.npy
 .idea/
-! data/test
 logs/
 test/
+*.tar.gz
+*.pptx
