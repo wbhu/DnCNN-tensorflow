@@ -32,8 +32,8 @@ class DnCNN(object):
         self.test_save_dir = test_save_dir
         self.epoch = epoch
         # Fixed params
-        self.save_every_epoch = 10
-        self.eval_every_epoch = 10
+        self.save_every_epoch = 2
+        self.eval_every_epoch = 2
         # Adam setting (default setting)
         self.beta1 = 0.9
         self.beta2 = 0.999
@@ -45,7 +45,7 @@ class DnCNN(object):
     def build_model(self):
         self.X_ = tf.placeholder(tf.float32, [None, None, None, self.input_c_dim],
                                  name='clean_image')
-        self.X = self.X_ + tf.truncated_normal(shape=tf.shape(self.X_), stddev=self.sigma / 255.0) # noisy batches
+        self.X = self.X_ + tf.truncated_normal(shape=tf.shape(self.X_), stddev=self.sigma / 255.0)  # noisy batches
         # layer 1
         with tf.variable_scope('conv1'):
             layer_1_output = self.layer(self.X, [3, 3, self.input_c_dim, 64], useBN=False)
@@ -129,15 +129,25 @@ class DnCNN(object):
         eval_data = load_images(eval_files)  # list of array of different size, 4-D, pixel value range is 0-255
         data = load_data(filepath='./data/img_clean_pats.npy')
         numBatch = int(data.shape[0] / self.batch_size)
+        load_model_status, global_step = self.load(self.ckpt_dir)
+        if load_model_status:
+            iter_num = global_step
+            start_epoch = global_step // numBatch
+            start_step = global_step % numBatch
+            print("[*] Model restore success!")
+        else:
+            iter_num = 0
+            start_epoch = 0
+            start_step = 0
+            print("[*] Not find pretrained model!")
         writer = tf.summary.FileWriter('./logs', self.sess.graph)
         merged = tf.summary.merge_all()
-        iter_num = 0
-        print("[*] Start training : ")
+        print("[*] Start training, with start epoch %d start iter %d : " % (start_epoch, iter_num))
         start_time = time.time()
         self.evaluate(iter_num, eval_data)  # eval_data value range is 0-255
-        for epoch in xrange(self.epoch):
+        for epoch in xrange(start_epoch, self.epoch):
             np.random.shuffle(data)
-            for batch_id in xrange(numBatch):
+            for batch_id in xrange(start_step, numBatch):
                 batch_images = data[batch_id * self.batch_size:(batch_id + 1) * self.batch_size, :, :, :]
                 batch_images = np.array(batch_images / 255.0, dtype=np.float32)  # normalize the data to 0-1
                 _, loss, summary = self.sess.run([self.train_step, self.loss, merged],
@@ -154,7 +164,7 @@ class DnCNN(object):
         print("[*] Finish training.")
 
     def save(self, iter_num):
-        model_name = "DnCNN.model"
+        model_name = "DnCNN-tensorflow"
         model_dir = "%s_%s_%s" % (self.trainset,
                                   self.batch_size, self.patch_sioze)
         checkpoint_dir = os.path.join(self.ckpt_dir, model_dir)
@@ -173,11 +183,12 @@ class DnCNN(object):
         checkpoint_dir = os.path.join(checkpoint_dir, model_dir)
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
-            ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
-            self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
-            return True
+            full_path = tf.train.latest_checkpoint(checkpoint_dir)
+            global_step = int(full_path.split('/')[-1].split('-')[-1])
+            self.saver.restore(self.sess, full_path)
+            return True, global_step
         else:
-            return False
+            return False, 0
 
     def test(self):
         """Test DnCNN"""
@@ -185,10 +196,9 @@ class DnCNN(object):
         tf.initialize_all_variables().run()
         test_files = glob('./data/test/{}/*.png'.format(self.testset))
         assert len(test_files) != 0, 'No testing data!'
-        if self.load(self.ckpt_dir):
-            print(" [*] Load weights SUCCESS...")
-        else:
-            print(" [!] Load weights FAILED...")
+        load_model_status, global_step = self.load(self.ckpt_dir)
+        assert load_model_status == True, '[!] Load weights FAILED...'
+        print(" [*] Load weights SUCCESS...")
         psnr_sum = 0
         print("[*] " + 'noise level: ' + str(self.sigma) + " start testing...")
         for idx in xrange(len(test_files)):
