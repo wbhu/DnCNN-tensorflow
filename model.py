@@ -195,7 +195,7 @@ class DnCNN(object):
             predicted_noise, noisy_image = self.sess.run([self.Y, self.X],
                                                          feed_dict={self.X_: clean_image})
             output_clean_image = noisy_image - predicted_noise
-            groundtruth = np.clip(clean_image, 0, 255).astype('uint8')
+            groundtruth = np.clip(255 * clean_image, 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
             # calculate PSNR
