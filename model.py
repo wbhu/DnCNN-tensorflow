@@ -45,7 +45,7 @@ class DnCNN(object):
     def build_model(self):
         self.X_ = tf.placeholder(tf.float32, [None, None, None, self.input_c_dim],
                                  name='clean_image')
-        self.X = self.X_ + tf.truncated_normal(shape=tf.shape(self.X_), stddev=self.sigma / 255.0)
+        self.X = self.X_ + tf.truncated_normal(shape=tf.shape(self.X_), stddev=self.sigma / 255.0) # noisy batches
         # layer 1
         with tf.variable_scope('conv1'):
             layer_1_output = self.layer(self.X, [3, 3, self.input_c_dim, 64], useBN=False)
@@ -82,7 +82,8 @@ class DnCNN(object):
             layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
         # layer 17
         with tf.variable_scope('conv17'):
-            self.Y = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False, useReLU=False) # predicted noise
+            self.Y = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False,
+                                useReLU=False)  # predicted noise
         # L2 loss
         self.Y_ = self.X - self.X_  # noisy image - clean image
         self.loss = (1.0 / self.batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
@@ -178,12 +179,12 @@ class DnCNN(object):
         else:
             return False
 
-
     def test(self):
         """Test DnCNN"""
         # init variables
         tf.initialize_all_variables().run()
         test_files = glob('./data/test/{}/*.png'.format(self.testset))
+        assert len(test_files) != 0, 'No testing data!'
         if self.load(self.ckpt_dir):
             print(" [*] Load weights SUCCESS...")
         else:
