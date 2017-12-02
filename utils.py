@@ -1,7 +1,6 @@
 import numpy as np
 import os, sys
 from PIL import Image
-import tensorflow as tf
 
 
 def data_augmentation(image, mode):
@@ -44,12 +43,6 @@ def load_data(filepath='./data/image_clean_pat.npy'):
     np.random.shuffle(data)
     print("[*] Load successfully...")
     return data
-
-
-def add_noise(data, sigma, sess):
-    # target image pixel value range is 0-1
-    noise = sigma / 255.0 * sess.run(tf.truncated_normal(data.shape))
-    return (data + noise)
 
 
 def load_images(filelist):
