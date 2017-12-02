@@ -48,41 +48,14 @@ class DnCNN(object):
         self.X = self.X_ + tf.truncated_normal(shape=tf.shape(self.X_), stddev=self.sigma / 255.0)  # noisy batches
         # layer 1
         with tf.variable_scope('conv1'):
-            layer_1_output = self.layer(self.X, [3, 3, self.input_c_dim, 64], useBN=False)
+            output = self.layer(self.X, [3, 3, self.input_c_dim, 64], useBN=False)
         # layer 2 to 16
-        with tf.variable_scope('conv2'):
-            layer_2_output = self.layer(layer_1_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv3'):
-            layer_3_output = self.layer(layer_2_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv4'):
-            layer_4_output = self.layer(layer_3_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv5'):
-            layer_5_output = self.layer(layer_4_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv6'):
-            layer_6_output = self.layer(layer_5_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv7'):
-            layer_7_output = self.layer(layer_6_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv8'):
-            layer_8_output = self.layer(layer_7_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv9'):
-            layer_9_output = self.layer(layer_8_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv10'):
-            layer_10_output = self.layer(layer_9_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv11'):
-            layer_11_output = self.layer(layer_10_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv12'):
-            layer_12_output = self.layer(layer_11_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv13'):
-            layer_13_output = self.layer(layer_12_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv14'):
-            layer_14_output = self.layer(layer_13_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv15'):
-            layer_15_output = self.layer(layer_14_output, [3, 3, 64, 64])
-        with tf.variable_scope('conv16'):
-            layer_16_output = self.layer(layer_15_output, [3, 3, 64, 64])
+        for layers in xrange(2, 16 + 1):
+            with tf.variable_scope('conv' + str(layers)):
+                output = self.layer(output, [3, 3, 64, 64])
         # layer 17
         with tf.variable_scope('conv17'):
-            self.Y = self.layer(layer_16_output, [3, 3, 64, self.output_c_dim], useBN=False,
+            self.Y = self.layer(output, [3, 3, 64, self.output_c_dim], useBN=False,
                                 useReLU=False)  # predicted noise
         # L2 loss
         self.Y_ = self.X - self.X_  # noisy image - clean image
