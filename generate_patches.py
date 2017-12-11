@@ -40,8 +40,8 @@ def generate_patches(isDebug=False):
             newsize = (int(img.size[0] * scales[s]), int(img.size[1] * scales[s]))
             img_s = img.resize(newsize, resample=PIL.Image.BICUBIC)  # do not change the original img
             im_h, im_w = img_s.size
-            for x in range(0 + args.step, (im_h - args.pat_size + 2), args.stride):
-                for y in range(0 + args.step, (im_w - args.pat_size + 2), args.stride):
+            for x in range(0 + args.step, (im_h - args.pat_size), args.stride):
+                for y in range(0 + args.step, (im_w - args.pat_size), args.stride):
                     count += 1
     origin_patch_num = count * DATA_AUG_TIMES
     
@@ -68,8 +68,8 @@ def generate_patches(isDebug=False):
             
             for j in xrange(DATA_AUG_TIMES):
                 im_h, im_w, _ = img_s.shape
-                for x in range(0 + args.step, im_h - args.pat_size + 1, args.stride):
-                    for y in range(0 + args.step, im_w - args.pat_size + 1, args.stride):
+                for x in range(0 + args.step, im_h - args.pat_size, args.stride):
+                    for y in range(0 + args.step, im_w - args.pat_size, args.stride):
                         inputs[count, :, :, :] = data_augmentation(img_s[x:x + args.pat_size, y:y + args.pat_size, :], \
                                                                    random.randint(0, 7))
                         count += 1

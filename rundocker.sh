@@ -2,5 +2,5 @@
 DIR=`pwd`
 nvidia-docker run \
 	-v ${DIR}:/workspace \
-	-it dncnn bash
+	-it wenbodut/dncnn bash
 
