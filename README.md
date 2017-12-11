@@ -82,6 +82,7 @@ $ python main.py --phase test
 - [x] Fix bug #13. (bug #13 fixed, thanks to @sdlpkxd)
 - [x] Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py).
 - [x] Add one-key denoising, with the help of docker.
+- [ ] Compare with original DnCNN compeletely.
 - [ ] Replace tf.nn with tf.layer.
 - [ ] Replace PIL with OpenCV.
 
