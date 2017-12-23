@@ -1,6 +1,7 @@
 import numpy as np
 import os, sys
 from PIL import Image
+import gc
 
 
 def data_augmentation(image, mode):
@@ -32,17 +33,38 @@ def data_augmentation(image, mode):
         image = np.rot90(image, k=3)
         return np.flipud(image)
 
+class train_data():
+    def __init__(self,filepath = './data/image_clean_pat.npy'):
+        self.filepath = filepath
+        assert '.npy' in filepath
+        if not os.path.exists(filepath):
+            print("[!] Data file not exists")
+            sys.exit(1)
+
+    def __enter__(self):
+        print("[*] Loading data...")
+        self.data = np.load(self.filepath)
+        np.random.shuffle(self.data)
+        print("[*] Load successfully...")
+        return self.data
+
+    def __exit__(self, type, value, trace):
+        del self.data
+        gc.collect()
+        print "In __exit__()"
+
 
 def load_data(filepath='./data/image_clean_pat.npy'):
-    assert '.npy' in filepath
-    if not os.path.exists(filepath):
-        print("[!] Data file not exists")
-        sys.exit(1)
-    print("[*] Loading data...")
-    data = np.load(filepath)
-    np.random.shuffle(data)
-    print("[*] Load successfully...")
-    return data
+    return train_data(filepath=filepath)
+    # assert '.npy' in filepath
+    # if not os.path.exists(filepath):
+    #     print("[!] Data file not exists")
+    #     sys.exit(1)
+    # print("[*] Loading data...")
+    # data = np.load(filepath)
+    # np.random.shuffle(data)
+    # print("[*] Load successfully...")
+    # return data
 
 
 def load_images(filelist):

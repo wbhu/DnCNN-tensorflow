@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:1.0.1-gpu
+FROM tensorflow/tensorflow:1.4.1-gpu
 RUN pip install \
     numpy
 VOLUME /workspace
