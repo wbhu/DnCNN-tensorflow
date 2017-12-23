@@ -1,10 +1,18 @@
-import tensorflow as tf
-import numpy as np
+import time
 from glob import glob
+
 from ops import *
 from utils import *
-from six.moves import xrange
-import time
+
+
+def dncnn(input, is_training=True, output_channels=1):
+    output = tf.layers.conv2d(input, 64, 3, padding='same', activation=tf.nn.relu, name='conv1')
+    for layers in xrange(2, 16 + 1):
+        output = tf.layers.conv2d(output, 64, 3, padding='same', name='conv%d' % layers)
+        output = tf.layers.batch_normalization(output, training=is_training, name='bn%d' % layers)
+        output = tf.nn.relu(output)
+    output = tf.layers.conv2d(output, output_channels, 3, padding='same', name='conv17')
+    return input - output
 
 
 class DnCNN(object):
@@ -43,56 +51,47 @@ class DnCNN(object):
         self.build_model()
 
     def build_model(self):
-        self.X_ = tf.placeholder(tf.float32, [None, None, None, self.input_c_dim],
+        self.Y_ = tf.placeholder(tf.float32, [None, None, None, self.input_c_dim],
                                  name='clean_image')
-        self.X = self.X_ + tf.truncated_normal(shape=tf.shape(self.X_), stddev=self.sigma / 255.0)  # noisy batches
-        # layer 1
-        with tf.variable_scope('conv1'):
-            output = self.layer(self.X, [3, 3, self.input_c_dim, 64], useBN=False)
-        # layer 2 to 16
-        for layers in xrange(2, 16 + 1):
-            with tf.variable_scope('conv' + str(layers)):
-                output = self.layer(output, [3, 3, 64, 64])
-        # layer 17
-        with tf.variable_scope('conv17'):
-            self.Y = self.layer(output, [3, 3, 64, self.output_c_dim], useBN=False,
-                                useReLU=False)  # predicted noise
-        # L2 loss
-        self.Y_ = self.X - self.X_  # noisy image - clean image
+        self.is_training = tf.placeholder(tf.bool, name='is_trning')
+        self.X = self.Y_ + tf.truncated_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy batches
+        self.Y = dncnn(self.X, is_training=self.is_training)
         self.loss = (1.0 / self.batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
         optimizer = tf.train.AdamOptimizer(self.lr, name='AdamOptimizer')
-        self.train_step = optimizer.minimize(self.loss)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.train_step = optimizer.minimize(self.loss)
         tf.summary.scalar('loss', self.loss)
         # create this init op after all variables specified
         self.init = tf.global_variables_initializer()
         self.saver = tf.train.Saver()
         print("[*] Initialize model successfully...")
 
-    def conv_layer(self, inputdata, weightshape, b_init, stridemode):
-        # weights
-        W = tf.get_variable('weights', weightshape,
-                            initializer=tf.constant_initializer(get_conv_weights(weightshape, self.sess)))
-        b = tf.get_variable('biases', [1, weightshape[-1]], initializer=tf.constant_initializer(b_init))
-        # convolutional layer
-        return tf.add(tf.nn.conv2d(inputdata, W, strides=stridemode, padding="SAME"), b)  # SAME with zero padding
-
-    def bn_layer(self, logits, output_dim, b_init=0.0):
-        alpha = tf.get_variable('bn_alpha', [1, output_dim], initializer=
-        tf.constant_initializer(get_bn_weights([1, output_dim], self.clip_b, self.sess)))
-        beta = tf.get_variable('bn_beta', [1, output_dim], initializer=
-        tf.constant_initializer(b_init))
-        return batch_normalization(logits, alpha, beta, isCovNet=True)
-
-    def layer(self, inputdata, filter_shape, b_init=0.0, stridemode=[1, 1, 1, 1], useBN=True, useReLU=True):
-        logits = self.conv_layer(inputdata, filter_shape, b_init, stridemode)
-        if useReLU == False:
-            output = logits
-        else:
-            if useBN:
-                output = tf.nn.relu(self.bn_layer(logits, filter_shape[-1]))
-            else:
-                output = tf.nn.relu(logits)
-        return output
+    # def conv_layer(self, inputdata, weightshape, b_init, stridemode):
+    #     # weights
+    #     W = tf.get_variable('weights', weightshape,
+    #                         initializer=tf.constant_initializer(get_conv_weights(weightshape, self.sess)))
+    #     b = tf.get_variable('biases', [1, weightshape[-1]], initializer=tf.constant_initializer(b_init))
+    #     # convolutional layer
+    #     return tf.add(tf.nn.conv2d(inputdata, W, strides=stridemode, padding="SAME"), b)  # SAME with zero padding
+    #
+    # def bn_layer(self, logits, output_dim, b_init=0.0):
+    #     alpha = tf.get_variable('bn_alpha', [1, output_dim], initializer=
+    #     tf.constant_initializer(get_bn_weights([1, output_dim], self.clip_b, self.sess)))
+    #     beta = tf.get_variable('bn_beta', [1, output_dim], initializer=
+    #     tf.constant_initializer(b_init))
+    #     return batch_normalization(logits, alpha, beta, isCovNet=True)
+    #
+    # def layer(self, inputdata, filter_shape, b_init=0.0, stridemode=[1, 1, 1, 1], useBN=True, useReLU=True):
+    #     logits = self.conv_layer(inputdata, filter_shape, b_init, stridemode)
+    #     if useReLU == False:
+    #         output = logits
+    #     else:
+    #         if useBN:
+    #             output = tf.nn.relu(self.bn_layer(logits, filter_shape[-1]))
+    #         else:
+    #             output = tf.nn.relu(logits)
+    #     return output
 
     def train(self):
         # init the variables
@@ -124,7 +123,7 @@ class DnCNN(object):
                 batch_images = data[batch_id * self.batch_size:(batch_id + 1) * self.batch_size, :, :, :]
                 batch_images = np.array(batch_images / 255.0, dtype=np.float32)  # normalize the data to 0-1
                 _, loss, summary = self.sess.run([self.train_step, self.loss, merged],
-                                                 feed_dict={self.X_: batch_images})
+                                                 feed_dict={self.Y_: batch_images, self.is_training: True})
                 print("Epoch: [%2d] [%4d/%4d] time: %4.4f, loss: %.6f"
                       % (epoch + 1, batch_id + 1, numBatch, time.time() - start_time, loss))
                 iter_num += 1
@@ -176,9 +175,8 @@ class DnCNN(object):
         print("[*] " + 'noise level: ' + str(self.sigma) + " start testing...")
         for idx in xrange(len(test_files)):
             clean_image = load_images(test_files[idx]).astype(np.float32) / 255.0
-            predicted_noise, noisy_image = self.sess.run([self.Y, self.X],
-                                                         feed_dict={self.X_: clean_image})
-            output_clean_image = noisy_image - predicted_noise
+            output_clean_image, noisy_image = self.sess.run([self.Y, self.X],
+                                                            feed_dict={self.Y_: clean_image, self.is_training: False})
             groundtruth = np.clip(255 * clean_image, 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
@@ -197,9 +195,8 @@ class DnCNN(object):
         psnr_sum = 0
         for idx in xrange(len(test_data)):
             clean_image = test_data[idx].astype(np.float32) / 255.0
-            predicted_noise, noisy_image = self.sess.run([self.Y, self.X],
-                                                         feed_dict={self.X_: clean_image})
-            output_clean_image = noisy_image - predicted_noise
+            output_clean_image, noisy_image = self.sess.run([self.Y, self.X],
+                                                            feed_dict={self.Y_: clean_image, self.is_training: False})
             groundtruth = np.clip(test_data[idx], 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
