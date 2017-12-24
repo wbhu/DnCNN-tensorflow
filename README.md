@@ -58,7 +58,7 @@ Then you could train the model.
 ### Without docker:
 You should make sure the following environment is contented
 ```
-tensorflow == 1.0.1
+tensorflow == 1.4.1
 numpy
 ```
 
