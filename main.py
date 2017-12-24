@@ -32,7 +32,7 @@ def denoiser_train(denoiser, lr):
 
 
 def denoiser_test(denoiser):
-    test_files = glob('./data/test/{}/*.png'.format(args.testset))
+    test_files = glob('./data/test/{}/*.png'.format(args.test_set))
     denoiser.test(test_files, ckpt_dir=args.ckpt_dir, save_dir=args.test_dir)
 
 
