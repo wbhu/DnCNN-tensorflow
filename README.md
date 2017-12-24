@@ -82,7 +82,7 @@ For the provided model, it took about 4 hours in GTX 1080TI.
 
 Here is my training loss:
 
-**Note**: This loss figure isn't suitable for this trained model any more, but I don't want to update the figure :)
+**Note**: This loss figure isn't suitable for this trained model any more, but I don't want to update the figure :new_moon_with_face:
 
 
 ![loss](./img/loss.png)
