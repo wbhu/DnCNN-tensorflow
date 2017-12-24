@@ -26,7 +26,8 @@ class denoiser(object):
         self.Y_ = tf.placeholder(tf.float32, [None, None, None, self.input_c_dim],
                                  name='clean_image')
         self.is_training = tf.placeholder(tf.bool, name='is_training')
-        self.X = self.Y_ + tf.random_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
+        # self.X = self.Y_ + tf.random_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
+        self.X = self.Y_ + tf.truncated_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
         self.Y = dncnn(self.X, is_training=self.is_training)
         self.loss = (1.0 / batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
         self.lr = tf.placeholder(tf.float32, name='learning_rate')
@@ -57,10 +58,10 @@ class denoiser(object):
         avg_psnr = psnr_sum / len(test_data)
         print("--- Test ---- Average PSNR %.2f ---" % avg_psnr)
 
-    def denoise(self,data):
+    def denoise(self, data):
         output_clean_image, noisy_image = self.sess.run([self.Y, self.X],
                                                         feed_dict={self.Y_: data, self.is_training: False})
-        return output_clean_image,noisy_image
+        return output_clean_image, noisy_image
 
     def train(self, data, eval_data, batch_size, ckpt_dir, epoch, lr, sample_dir, eval_every_epoch=2):
         # assert data range is between 0 and 1
@@ -91,14 +92,15 @@ class denoiser(object):
                 batch_images = data[batch_id * batch_size:(batch_id + 1) * batch_size, :, :, :]
                 # batch_images = batch_images.astype(np.float32) / 255.0 # normalize the data to 0-1
                 _, loss, summary = self.sess.run([self.train_op, self.loss, merged],
-                                                 feed_dict={self.Y_: batch_images, self.lr: lr[epoch], self.is_training: True})
+                                                 feed_dict={self.Y_: batch_images, self.lr: lr[epoch],
+                                                            self.is_training: True})
                 print("Epoch: [%2d] [%4d/%4d] time: %4.4f, loss: %.6f"
                       % (epoch + 1, batch_id + 1, numBatch, time.time() - start_time, loss))
                 iter_num += 1
                 writer.add_summary(summary, iter_num)
             if np.mod(epoch + 1, eval_every_epoch) == 0:
                 self.evaluate(epoch, eval_data, sample_dir=sample_dir)  # eval_data value range is 0-255
-                self.save(iter_num,ckpt_dir)
+                self.save(iter_num, ckpt_dir)
         print("[*] Finish training.")
 
     def save(self, iter_num, ckpt_dir, model_name='DnCNN-tensorflow'):
