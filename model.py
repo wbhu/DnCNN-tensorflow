@@ -1,7 +1,5 @@
 import time
 
-import tensorflow as tf
-
 from utils import *
 
 
@@ -26,11 +24,12 @@ class denoiser(object):
         self.Y_ = tf.placeholder(tf.float32, [None, None, None, self.input_c_dim],
                                  name='clean_image')
         self.is_training = tf.placeholder(tf.bool, name='is_training')
-        # self.X = self.Y_ + tf.random_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
-        self.X = self.Y_ + tf.truncated_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
+        self.X = self.Y_ + tf.random_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
+        # self.X = self.Y_ + tf.truncated_normal(shape=tf.shape(self.Y_), stddev=self.sigma / 255.0)  # noisy images
         self.Y = dncnn(self.X, is_training=self.is_training)
         self.loss = (1.0 / batch_size) * tf.nn.l2_loss(self.Y_ - self.Y)
         self.lr = tf.placeholder(tf.float32, name='learning_rate')
+        self.eva_psnr = tf_psnr(self.Y, self.Y_)
         optimizer = tf.train.AdamOptimizer(self.lr, name='AdamOptimizer')
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         with tf.control_dependencies(update_ops):
@@ -39,13 +38,17 @@ class denoiser(object):
         self.sess.run(init)
         print("[*] Initialize model successfully...")
 
-    def evaluate(self, iter_num, test_data, sample_dir):
+    def evaluate(self, iter_num, test_data, sample_dir, summary_merged, summary_writer):
         # assert test_data value range is 0-255
         print("[*] Evaluating...")
         psnr_sum = 0
         for idx in xrange(len(test_data)):
             clean_image = test_data[idx].astype(np.float32) / 255.0
-            output_clean_image, noisy_image = self.denoise(clean_image)
+            output_clean_image, noisy_image, psnr_summary = self.sess.run(
+                [self.Y, self.X, summary_merged],
+                feed_dict={self.Y_: clean_image,
+                           self.is_training: False})
+            summary_writer.add_summary(psnr_summary, iter_num)
             groundtruth = np.clip(test_data[idx], 0, 255).astype('uint8')
             noisyimage = np.clip(255 * noisy_image, 0, 255).astype('uint8')
             outputimage = np.clip(255 * output_clean_image, 0, 255).astype('uint8')
@@ -56,12 +59,13 @@ class denoiser(object):
             save_images(os.path.join(sample_dir, 'test%d_%d.png' % (idx + 1, iter_num)),
                         groundtruth, noisyimage, outputimage)
         avg_psnr = psnr_sum / len(test_data)
+
         print("--- Test ---- Average PSNR %.2f ---" % avg_psnr)
 
     def denoise(self, data):
-        output_clean_image, noisy_image = self.sess.run([self.Y, self.X],
-                                                        feed_dict={self.Y_: data, self.is_training: False})
-        return output_clean_image, noisy_image
+        output_clean_image, noisy_image, psnr = self.sess.run([self.Y, self.X, self.eva_psnr],
+                                                              feed_dict={self.Y_: data, self.is_training: False})
+        return output_clean_image, noisy_image, psnr
 
     def train(self, data, eval_data, batch_size, ckpt_dir, epoch, lr, sample_dir, eval_every_epoch=2):
         # assert data range is between 0 and 1
@@ -83,9 +87,11 @@ class denoiser(object):
         tf.summary.scalar('lr', self.lr)
         writer = tf.summary.FileWriter('./logs', self.sess.graph)
         merged = tf.summary.merge_all()
+        summary_psnr = tf.summary.scalar('eva_psnr', self.eva_psnr)
         print("[*] Start training, with start epoch %d start iter %d : " % (start_epoch, iter_num))
         start_time = time.time()
-        self.evaluate(iter_num, eval_data, sample_dir=sample_dir)  # eval_data value range is 0-255
+        self.evaluate(iter_num, eval_data, sample_dir=sample_dir, summary_merged=summary_psnr,
+                      summary_writer=writer)  # eval_data value range is 0-255
         for epoch in xrange(start_epoch, epoch):
             np.random.shuffle(data)
             for batch_id in xrange(start_step, numBatch):
@@ -99,7 +105,8 @@ class denoiser(object):
                 iter_num += 1
                 writer.add_summary(summary, iter_num)
             if np.mod(epoch + 1, eval_every_epoch) == 0:
-                self.evaluate(epoch, eval_data, sample_dir=sample_dir)  # eval_data value range is 0-255
+                self.evaluate(iter_num, eval_data, sample_dir=sample_dir, summary_merged=summary_psnr,
+                              summary_writer=writer)  # eval_data value range is 0-255
                 self.save(iter_num, ckpt_dir)
         print("[*] Finish training.")
 

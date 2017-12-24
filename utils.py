@@ -1,7 +1,10 @@
-import numpy as np
-import os, sys
-from PIL import Image
 import gc
+import os
+import sys
+
+import numpy as np
+import tensorflow as tf
+from PIL import Image
 
 
 def data_augmentation(image, mode):
@@ -33,8 +36,9 @@ def data_augmentation(image, mode):
         image = np.rot90(image, k=3)
         return np.flipud(image)
 
+
 class train_data():
-    def __init__(self,filepath = './data/image_clean_pat.npy'):
+    def __init__(self, filepath='./data/image_clean_pat.npy'):
         self.filepath = filepath
         assert '.npy' in filepath
         if not os.path.exists(filepath):
@@ -97,3 +101,9 @@ def cal_psnr(im1, im2):
     mse = ((im1.astype(np.float) - im2.astype(np.float)) ** 2).mean()
     psnr = 10 * np.log10(255 ** 2 / mse)
     return psnr
+
+
+def tf_psnr(im1, im2):
+    # assert pixel value range is 0-1
+    mse = tf.losses.mean_squared_error(labels=im2 * 255.0, predictions=im1 * 255.0)
+    return 10.0 * (tf.log(255.0 ** 2 / mse) / tf.log(10.0))
