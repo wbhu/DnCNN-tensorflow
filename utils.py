@@ -60,15 +60,6 @@ class train_data():
 
 def load_data(filepath='./data/image_clean_pat.npy'):
     return train_data(filepath=filepath)
-    # assert '.npy' in filepath
-    # if not os.path.exists(filepath):
-    #     print("[!] Data file not exists")
-    #     sys.exit(1)
-    # print("[*] Loading data...")
-    # data = np.load(filepath)
-    # np.random.shuffle(data)
-    # print("[*] Load successfully...")
-    # return data
 
 
 def load_images(filelist):

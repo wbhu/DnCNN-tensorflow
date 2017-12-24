@@ -6,11 +6,11 @@
 A tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
 
 ## Model Architecture
-![graph](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/model.png)
+![graph](./img/model.png)
 
 
 ## Results
-![compare](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/compare.png)
+![compare](./img/compare.png)
 
 - BSD68 Average Result
  
@@ -18,7 +18,16 @@ The average PSNR(dB) results of different methods on the BSD68 dataset.
 
 |  Noise Level | BM3D | WNNM  | EPLL | MLP |  CSF |TNRD  | DnCNN-S | DnCNN-B | DnCNN-tensorflow |
 |:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|:-------:|
-| 25  |  28.57  |   28.83   | 28.68  | 28.96 |  28.74 |  28.92 | **29.23** | **29.16**  | **29.24** |
+| 25  |  28.57  |   28.83   | 28.68  | 28.96 |  28.74 |  28.92 | **29.23** | **29.16**  | **29.17** |
+
+- Set12 Average Result
+
+
+| Noise Level | DnCNN-S | DnCNN-tensorflow |
+|:-----------:|:-------:|:----------------:|
+| 25          | 30.44   | **30.38**        |
+
+For the dataset and denoised images, please download [here](https://drive.google.com/open?id=16x8E7h0srYQliXbrO0pvX6zogfW1hN2P)
 
 
 ## Environment
@@ -68,10 +77,13 @@ $ python main.py
 (note: You can add command line arguments according to the source code, for example
     $ python main.py --batch_size 64 )
 ```
-Here is my training loss:
+
+For the provided model, it took about 4 hours in GTX 1080TI.
+
+Here is my training loss (this loss figure isn't suitable for this trained model now.):
 
 
-![loss](https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/img/loss.png) 
+![loss](./img/loss.png)
 
 ## Test
 ```
@@ -82,8 +94,8 @@ $ python main.py --phase test
 - [x] Fix bug #13. (bug #13 fixed, thanks to @sdlpkxd)
 - [x] Clean source  code. For instance, merge similar functions(e.g., 'load_images 'and 'load_image' in utils.py).
 - [x] Add one-key denoising, with the help of docker.
-- [ ] Compare with original DnCNN compeletely.
-- [ ] Replace tf.nn with tf.layer.
+- [x] Compare with original DnCNN.
+- [x] Replace tf.nn with tf.layer.
 - [ ] Replace PIL with OpenCV.
 
 
