@@ -99,6 +99,7 @@ $ python main.py --phase test
 - [x] Compare with original DnCNN.
 - [x] Replace tf.nn with tf.layer.
 - [ ] Replace PIL with OpenCV.
+- [ ] Try tf.dataset API to speed up training process.
 
 
 ## Thanks for their contributions
