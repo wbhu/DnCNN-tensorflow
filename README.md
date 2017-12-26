@@ -100,6 +100,7 @@ $ python main.py --phase test
 - [x] Replace tf.nn with tf.layer.
 - [ ] Replace PIL with OpenCV.
 - [ ] Try tf.dataset API to speed up training process.
+- [ ] Train a noise level blind model.
 
 
 ## Thanks for their contributions
