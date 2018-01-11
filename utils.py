@@ -55,7 +55,7 @@ class train_data():
     def __exit__(self, type, value, trace):
         del self.data
         gc.collect()
-        print "In __exit__()"
+        print("In __exit__()")
 
 
 def load_data(filepath='./data/image_clean_pat.npy'):
