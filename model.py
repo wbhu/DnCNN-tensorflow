@@ -164,7 +164,6 @@ class denoiser(object):
         assert load_model_status == True, '[!] Load weights FAILED...'
         print(" [*] Load weights SUCCESS...")
         psnr_sum = 0
-        psnr_sum2 = 0
             
         for i in xrange(len(eval_files)):
             clean_image = cv2.imread(eval_files[i])
@@ -191,8 +190,6 @@ class denoiser(object):
 
         avg_psnr = psnr_sum / len(eval_files)
         print("--- Test ---- Average PSNR %.2f ---" % avg_psnr)
-        avg_psnr2 = psnr_sum2 / (len(eval_files)-1)
-        print("--- Test ---- Average temporal PSNR %.2f ---" % avg_psnr2)
 
     
 class dataset(object):
