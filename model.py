@@ -44,7 +44,7 @@ class denoiser(object):
         self.sess.run(init)
         print("[*] Initialize model successfully...")
 
-    def evaluate(self, iter_num, eval_files, noisy_files, sample_dir, summary_writer):
+    def evaluate(self, iter_num, eval_files, noisy_files, summary_writer):
         print("[*] Evaluating...")
         psnr_sum = 0
         
@@ -69,7 +69,7 @@ class denoiser(object):
         print("--- Test ---- Average PSNR %.2f ---" % avg_psnr)
 
 
-    def train(self, eval_files, noisy_files, batch_size, ckpt_dir, epoch, lr, sample_dir, eval_every_epoch=1):
+    def train(self, eval_files, noisy_files, batch_size, ckpt_dir, epoch, lr, eval_every_epoch=1):
 
         numBatch = int(len(filepaths) * 2)
         # load pretrained model
@@ -93,7 +93,7 @@ class denoiser(object):
 
         print("[*] Start training, with start epoch %d start iter %d : " % (start_epoch, iter_num))
         start_time = time.time()
-        self.evaluate(iter_num, eval_files, noisy_files, sample_dir=sample_dir,summary_writer=writer)  # eval_data value range is 0-255
+        self.evaluate(iter_num, eval_files, noisy_files, summary_writer=writer)  # eval_data value range is 0-255
         for epoch in xrange(start_epoch, epoch):
             batch_noisy = np.zeros((128,64,64,3),dtype='float32')
             batch_images = np.zeros((128,64,64,3),dtype='float32')
@@ -104,6 +104,7 @@ class denoiser(object):
                 raise
               except:
                 self.dataset = dataset(self.sess) # Dataset re init
+                res = self.dataset.get_batch()
               if batch_id==0:
                 batch_noisy = np.zeros((128,64,64,3),dtype='float32')
                 batch_images = np.zeros((128,64,64,3),dtype='float32')
@@ -128,7 +129,7 @@ class denoiser(object):
               writer.add_summary(summary, iter_num)
               
             if np.mod(epoch + 1, eval_every_epoch) == 0: ##Evaluate and save model
-                self.evaluate(iter_num, eval_files, noisy_files, sample_dir=sample_dir,summary_writer=writer)
+                self.evaluate(iter_num, eval_files, noisy_files, summary_writer=writer)
                 self.save(iter_num, ckpt_dir)
         print("[*] Training finished.")
 
@@ -164,8 +165,6 @@ class denoiser(object):
         print(" [*] Load weights SUCCESS...")
         psnr_sum = 0
         psnr_sum2 = 0
-        if temporal:
-            createBackSub = False
             
         for i in xrange(len(eval_files)):
             clean_image = cv2.imread(eval_files[i])
@@ -227,7 +226,7 @@ class dataset(object):
     self.iter = iterator.get_next()
   
 
-    def get_batch(self):
+  def get_batch(self):
         res = self.sess.run(self.iter)
         return res
         
