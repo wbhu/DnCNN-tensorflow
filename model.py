@@ -117,7 +117,6 @@ class denoiser(object):
 #              for i in range(64):
 #                cv2.imshow('raw',batch_images[i])
 #                cv2.imshow('noisy',batch_noisy[i])
-#                cv
               _, loss, summary = self.sess.run([self.train_op, self.loss, merged],
                                                  feed_dict={self.Y_: batch_images, self.X: batch_noisy, self.lr: lr[epoch],
                                                             self.is_training: True})
@@ -189,35 +188,6 @@ class denoiser(object):
             print("img%d PSNR: %.2f , noisy PSNR: %.2f" % (i + 1, psnr, psnr1))
             psnr_sum += psnr
 
-            ## Temporal denoising
-            if temporal:
-                if not createBackSub: ## Init motion detection
-                    fgbg = cv2.createBackgroundSubtractorMOG2()
-                    vidsize = out1[0,0].shape
-                    frame = np.zeros((vidsize),dtype='float32')
-                    prev_frame = np.zeros((frame.shape),dtype='float32')
-                    denoised = np.zeros((frame.shape),dtype='float32')
-                    erosion = np.zeros((frame.shape[0:2]),dtype='float32')
-                    erosion2 = np.zeros((frame.shape[0:2]),dtype='float32')
-                    prev_frame[:,:,:] = out1[0,0]
-                    prev_frame2 = prev_frame
-                    createBackSub=True
-                    continue
-                fgmask = fgbg.apply(out1[0,0]*255)
-#                erosion = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3)), iterations = 1)
-                erosion = cv2.erode(fgmask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5)), iterations = 1)
-                erosion = cv2.dilate(erosion, cv2.getStructuringElement(cv2.MORPH_RECT,(8,8)), iterations = 1)
-                denoised[:,:,:]=out1[0,0][:,:,:]
-                denoised[(erosion+erosion2)==0,:] = 0.3*prev_frame2[(erosion+erosion2)==0,:] + 0.3*prev_frame[(erosion+erosion2)==0,:] + 0.4*out1[0,0][(erosion+erosion2)==0,:]
-                prev_frame2[:,:,:] = prev_frame[:,:,:]                
-                prev_frame[:,:,:] = denoised[:,:,:]
-#                cv2.imshow('temporal',erosion)
-#                cv2.waitKey(0)
-                erosion2=erosion
-                psnr2 = psnr_scaled(clean_image,denoised)                
-                print("img%d temporal PSNR: %.2f" % (i + 1, psnr2))
-                psnr_sum2 += psnr2
-                out1[0,0]=denoised
             cv2.imwrite('./data/denoised/%04d.png'%(i),out1[0,0]*255.0)
 
         avg_psnr = psnr_sum / len(eval_files)

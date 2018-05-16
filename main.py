@@ -14,7 +14,6 @@ parser.add_argument('--use_gpu', dest='use_gpu', type=int, default=1, help='gpu 
 parser.add_argument('--phase', dest='phase', default='train', help='train or test')
 parser.add_argument('--checkpoint_dir', dest='ckpt_dir', default='./checkpoint', help='models are saved here')
 parser.add_argument('--test_dir', dest='test_dir', default='./data/denoised', help='denoised sample are saved here')
-parser.add_argument('--temporal', dest='temporal', type=bool, default=False, help='Activate the temporal denoising for video sequences')
 args = parser.parse_args()
 
 
