@@ -95,8 +95,8 @@ class denoiser(object):
         start_time = time.time()
         self.evaluate(iter_num, eval_files, noisy_files, summary_writer=writer)  # eval_data value range is 0-255
         for epoch in xrange(start_epoch, epoch):
-            batch_noisy = np.zeros((128,64,64,3),dtype='float32')
-            batch_images = np.zeros((128,64,64,3),dtype='float32')
+            batch_noisy = np.zeros((batch_size,64,64,3),dtype='float32')
+            batch_images = np.zeros((batch_size,64,64,3),dtype='float32')
             for batch_id in xrange(start_step, numBatch):
               try:
                 res = self.dataset.get_batch() # If we get an error retrieving a batch of patches we have to reinitialize the dataset
@@ -106,11 +106,11 @@ class denoiser(object):
                 self.dataset = dataset(self.sess) # Dataset re init
                 res = self.dataset.get_batch()
               if batch_id==0:
-                batch_noisy = np.zeros((128,64,64,3),dtype='float32')
-                batch_images = np.zeros((128,64,64,3),dtype='float32')
+                batch_noisy = np.zeros((batch_size,64,64,3),dtype='float32')
+                batch_images = np.zeros((batch_size,64,64,3),dtype='float32')
               ind1 = range(res.shape[0]/2)
               ind1 = np.multiply(ind1,2)
-              for i in range(128):
+              for i in range(batch_size):
                 random.shuffle(ind1)
                 ind2 = random.randint(0,8-1)
                 batch_noisy[i] = res[ind1[0],ind2]
