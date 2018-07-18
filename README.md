@@ -38,7 +38,7 @@ The average PSNR(dB) results of different methods on the BSD68 dataset.
 
 ## Requirements
 ```
-tensorflow == 1.4.1
+tensorflow >= 1.4
 numpy
 opencv
 ```
