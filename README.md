@@ -4,14 +4,6 @@
   
 A tensorflow implement of the TIP2017 paper [Beyond a Gaussian Denoiser: Residual Learning of Deep CNN for Image Denoising](http://www4.comp.polyu.edu.hk/~cslzhang/paper/DnCNN.pdf)
 
-## This is a fork of https://github.com/crisb-DUT/DnCNN-tensorflow
-The main differences from the original version are:
-- It supports RGB images.
-- PIL was replaced with OpenCV.
-- You don't need to generate patches in advance, which require a lot of disk and memory space.
-- The noise is not added within the programme but you need an original and a noisy image, so you can train the model even with different types of noise.
-- The provided checkpoint/model was trained for blind gaussian denoising with sigma values 0-50.
-
 ## Model Architecture
 ![graph](./img/model.png)
 
